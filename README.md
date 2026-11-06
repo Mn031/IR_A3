@@ -66,17 +66,17 @@ Evaluated on the **45 unseen test queries** (macro-averaged across all queries):
 
 | Evaluation Metric | Pure BM25 Baseline | Method A (Weighted Zone) | Method B (Linear SVM LTR) | Relative $\Delta$ (A vs. Base) | Relative $\Delta$ (B vs. Base) |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **P@5** | **0.4578** | 0.4000 | 0.3956 | -12.63% | -13.59% |
-| **P@10** | **0.3089** | 0.2644 | 0.2600 | -14.41% | -15.83% |
-| **P@20** | **0.1956** | 0.1678 | 0.1611 | -14.21% | -17.64% |
-| **R@5** | **0.3698** | 0.3207 | 0.3317 | -13.28% | -10.30% |
-| **R@10** | **0.4812** | 0.4141 | 0.4275 | -13.94% | -11.16% |
-| **R@20** | **0.5864** | 0.5265 | 0.5126 | -10.21% | -12.59% |
-| **F1@5** | **0.3795** | 0.3338 | 0.3353 | -12.04% | -11.65% |
-| **F1@10** | **0.3500** | 0.3033 | 0.3034 | -13.34% | -13.31% |
-| **F1@20** | **0.2759** | 0.2416 | 0.2335 | -12.43% | -15.37% |
-| **MAP (@100)** | **0.4291** | 0.3473 | 0.3766 | -19.06% | -12.23% |
-| **MRR** | **0.8310** | 0.7145 | **0.8193** | -14.02% | **-1.41%** |
+| **P@5** | **0.4578** | 0.4000 | 0.3867 | -12.63% | -15.53% |
+| **P@10** | **0.3089** | 0.2644 | 0.2644 | -14.41% | -14.41% |
+| **P@20** | **0.1956** | 0.1678 | 0.1667 | -14.21% | -14.78% |
+| **R@5** | **0.3698** | 0.3207 | 0.3259 | -13.28% | -11.87% |
+| **R@10** | **0.4812** | 0.4141 | 0.4272 | -13.94% | -11.22% |
+| **R@20** | **0.5864** | 0.5265 | 0.5295 | -10.21% | -9.70% |
+| **F1@5** | **0.3795** | 0.3338 | 0.3282 | -12.04% | -13.52% |
+| **F1@10** | **0.3500** | 0.3033 | 0.3066 | -13.34% | -12.40% |
+| **F1@20** | **0.2759** | 0.2416 | 0.2406 | -12.43% | -12.79% |
+| **MAP (@100)** | **0.4291** | 0.3473 | 0.3926 | -19.06% | -8.51% |
+| **MRR** | 0.8310 | 0.7145 | **0.8346** | -14.02% | **+0.43%** |
 
 ---
 
@@ -92,18 +92,18 @@ Evaluated on the **45 unseen test queries** (macro-averaged across all queries):
   * **Author ($w_A$):** **0.0000** (0%)
 
 ### Method B: Learned Real-Valued Weights (Linear SVM, $C=0.01$)
-Trained on 18,419 query-document candidate pairs with balanced class weights:
+Trained on 18,419 query-document candidate pairs with balanced class weights and bounded cosine similarity:
 * **Top Positive Drivers:**
-  * `sum norm tf` ($w_{\text{std}} = +0.1690$, $w_{\text{raw}} = +3.343976$)
-  * `max norm tf` ($w_{\text{std}} = +0.1553$, $w_{\text{raw}} = +7.613548$)
-  * `mean of tf*idf` ($w_{\text{std}} = +0.1648$, $w_{\text{raw}} = +0.125295$)
-  * `variance of tf*idf` ($w_{\text{std}} = +0.1743$, $w_{\text{raw}} = +0.008410$)
-  * `idf` ($w_{\text{std}} = +0.1349$, $w_{\text{raw}} = +0.034584$)
-  * `sum of tf*idf` ($w_{\text{std}} = +0.1225$, $w_{\text{raw}} = +0.009845$)
-  * `sum of term frequency` ($w_{\text{std}} = +0.1103$, $w_{\text{raw}} = +0.019011$)
-  * `vector space model` ($w_{\text{std}} = +0.0297$, $w_{\text{raw}} = +0.375203$)
-  * `BM25` ($w_{\text{std}} = +0.0097$, $w_{\text{raw}} = +0.001886$)
-* **Decision Boundary Offset (Intercept):** $b_{\text{std}} = -0.1092$, $b_{\text{raw}} = +0.187820$.
+  * `vector space model` ($w_{\text{std}} = +0.2171$, $w_{\text{raw}} = +3.169704$)
+  * `BM25` ($w_{\text{std}} = +0.2059$, $w_{\text{raw}} = +0.043650$)
+  * `mean of term frequency` ($w_{\text{std}} = +0.1949$, $w_{\text{raw}} = +0.323499$)
+  * `variance of tf*idf` ($w_{\text{std}} = +0.1780$, $w_{\text{raw}} = +0.008587$)
+  * `max norm tf` ($w_{\text{std}} = +0.1270$, $w_{\text{raw}} = +6.223214$)
+  * `sum norm tf` ($w_{\text{std}} = +0.0839$, $w_{\text{raw}} = +1.660487$)
+  * `min of term frequency` ($w_{\text{std}} = +0.0631$, $w_{\text{raw}} = +0.052758$)
+  * `mean of tf*idf` ($w_{\text{std}} = +0.0447$, $w_{\text{raw}} = +0.033947$)
+  * `stream length` ($w_{\text{std}} = +0.0369$, $w_{\text{raw}} = +0.000662$)
+* **Decision Boundary Offset (Intercept):** $b_{\text{std}} = -0.1166$, $b_{\text{raw}} = +0.233543$.
 
 ---
 

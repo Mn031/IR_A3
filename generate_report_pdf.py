@@ -434,29 +434,29 @@ def build_pdf_report(filename="IR_PA3.pdf"):
 
     weights_table_data = [
         [Paragraph("<b>#</b>", table_header), Paragraph("<b>Feature Name</b>", table_header), Paragraph("<b>Standardized (w_std)</b>", table_header), Paragraph("<b>Raw Weight (w_raw)</b>", table_header), Paragraph("<b>Interpretation</b>", table_header)],
-        [Paragraph("1", table_cell), Paragraph("query term number", table_cell), Paragraph("-0.1175", table_cell), Paragraph("-0.029526", table_cell), Paragraph("Length penalty prior", table_cell)],
-        [Paragraph("2", table_cell), Paragraph("query term ratio", table_cell), Paragraph("-0.1415", table_cell), Paragraph("-0.891322", table_cell), Paragraph("Compensated by overlap", table_cell)],
-        [Paragraph("3", table_cell), Paragraph("stream length", table_cell), Paragraph("+0.0051", table_cell), Paragraph("+0.000091", table_cell), Paragraph("Neutral length scale", table_cell)],
-        [Paragraph("4", table_cell), Paragraph("idf", table_cell), Paragraph("<b>+0.1349</b>", table_cell), Paragraph("+0.034584", table_cell), Paragraph("Strong positive discriminator", table_cell)],
-        [Paragraph("5", table_cell), Paragraph("sum of term frequency", table_cell), Paragraph("<b>+0.1103</b>", table_cell), Paragraph("+0.019011", table_cell), Paragraph("Positive keyword presence", table_cell)],
-        [Paragraph("6", table_cell), Paragraph("min of term frequency", table_cell), Paragraph("+0.0659", table_cell), Paragraph("+0.055061", table_cell), Paragraph("Positive coverage bonus", table_cell)],
-        [Paragraph("7", table_cell), Paragraph("max of term frequency", table_cell), Paragraph("-0.0846", table_cell), Paragraph("-0.035887", table_cell), Paragraph("Keyword stuffing regularizer", table_cell)],
-        [Paragraph("8", table_cell), Paragraph("mean of term frequency", table_cell), Paragraph("+0.0369", table_cell), Paragraph("+0.061225", table_cell), Paragraph("Positive density signal", table_cell)],
-        [Paragraph("9", table_cell), Paragraph("variance of term frequency", table_cell), Paragraph("-0.1516", table_cell), Paragraph("-0.047394", table_cell), Paragraph("Penalizes uneven matches", table_cell)],
-        [Paragraph("10", table_cell), Paragraph("sum norm tf", table_cell), Paragraph("<b>+0.1690</b>", table_cell), Paragraph("+3.343976", table_cell), Paragraph("Primary positive density driver", table_cell)],
-        [Paragraph("11", table_cell), Paragraph("min norm tf", table_cell), Paragraph("+0.0236", table_cell), Paragraph("+1.719580", table_cell), Paragraph("Consistent density reward", table_cell)],
-        [Paragraph("12", table_cell), Paragraph("max norm tf", table_cell), Paragraph("<b>+0.1553</b>", table_cell), Paragraph("+7.613548", table_cell), Paragraph("Topical keyword concentration", table_cell)],
-        [Paragraph("13", table_cell), Paragraph("mean norm tf", table_cell), Paragraph("+0.0079", table_cell), Paragraph("+1.460665", table_cell), Paragraph("Average density metric", table_cell)],
-        [Paragraph("14", table_cell), Paragraph("variance norm tf", table_cell), Paragraph("-0.1445", table_cell), Paragraph("-644.390781", table_cell), Paragraph("Penalizes density spikes", table_cell)],
-        [Paragraph("15", table_cell), Paragraph("sum of tf*idf", table_cell), Paragraph("<b>+0.1225</b>", table_cell), Paragraph("+0.009845", table_cell), Paragraph("Core composite relevance", table_cell)],
-        [Paragraph("16", table_cell), Paragraph("min of tf*idf", table_cell), Paragraph("-0.1984", table_cell), Paragraph("-0.057138", table_cell), Paragraph("Collinear negative stabilizer", table_cell)],
-        [Paragraph("17", table_cell), Paragraph("max of tf*idf", table_cell), Paragraph("-0.2057", table_cell), Paragraph("-0.034303", table_cell), Paragraph("Collinear negative stabilizer", table_cell)],
-        [Paragraph("18", table_cell), Paragraph("mean of tf*idf", table_cell), Paragraph("<b>+0.1648</b>", table_cell), Paragraph("+0.125295", table_cell), Paragraph("High-impact positive signal", table_cell)],
-        [Paragraph("19", table_cell), Paragraph("variance of tf*idf", table_cell), Paragraph("<b>+0.1743</b>", table_cell), Paragraph("+0.008410", table_cell), Paragraph("Rewards distinctive keywords", table_cell)],
-        [Paragraph("20", table_cell), Paragraph("boolean model", table_cell), Paragraph("-0.2520", table_cell), Paragraph("-0.148140", table_cell), Paragraph("Counteracts coarse overlap", table_cell)],
-        [Paragraph("21", table_cell), Paragraph("vector space model", table_cell), Paragraph("<b>+0.0297</b>", table_cell), Paragraph("+0.375203", table_cell), Paragraph("Cosine alignment positive", table_cell)],
-        [Paragraph("22", table_cell), Paragraph("BM25", table_cell), Paragraph("<b>+0.0097</b>", table_cell), Paragraph("+0.001886", table_cell), Paragraph("Probabilistic anchor", table_cell)],
-        [Paragraph("23", table_cell), Paragraph("Intercept / Bias (b)", table_cell), Paragraph("-0.1092", table_cell), Paragraph("+0.187820", table_cell), Paragraph("Decision boundary offset", table_cell)],
+        [Paragraph("1", table_cell), Paragraph("query term number", table_cell), Paragraph("-0.1648", table_cell), Paragraph("-0.041424", table_cell), Paragraph("Length penalty prior", table_cell)],
+        [Paragraph("2", table_cell), Paragraph("query term ratio", table_cell), Paragraph("-0.2844", table_cell), Paragraph("-1.791588", table_cell), Paragraph("Compensated by overlap", table_cell)],
+        [Paragraph("3", table_cell), Paragraph("stream length", table_cell), Paragraph("+0.0369", table_cell), Paragraph("+0.000662", table_cell), Paragraph("Document length scale", table_cell)],
+        [Paragraph("4", table_cell), Paragraph("idf", table_cell), Paragraph("-0.0507", table_cell), Paragraph("-0.014053", table_cell), Paragraph("Absorbed by composite VSM", table_cell)],
+        [Paragraph("5", table_cell), Paragraph("sum of term frequency", table_cell), Paragraph("+0.0044", table_cell), Paragraph("+0.000750", table_cell), Paragraph("Baseline frequency signal", table_cell)],
+        [Paragraph("6", table_cell), Paragraph("min of term frequency", table_cell), Paragraph("+0.0631", table_cell), Paragraph("+0.052758", table_cell), Paragraph("Rare keyword match bonus", table_cell)],
+        [Paragraph("7", table_cell), Paragraph("max of term frequency", table_cell), Paragraph("-0.0213", table_cell), Paragraph("-0.009025", table_cell), Paragraph("Dampens frequency spikes", table_cell)],
+        [Paragraph("8", table_cell), Paragraph("mean of term frequency", table_cell), Paragraph("<b>+0.1949</b>", table_cell), Paragraph("+0.323499", table_cell), Paragraph("Strong average density signal", table_cell)],
+        [Paragraph("9", table_cell), Paragraph("variance of term frequency", table_cell), Paragraph("-0.1227", table_cell), Paragraph("-0.038346", table_cell), Paragraph("Penalizes keyword imbalance", table_cell)],
+        [Paragraph("10", table_cell), Paragraph("sum norm tf", table_cell), Paragraph("+0.0839", table_cell), Paragraph("+1.660487", table_cell), Paragraph("Normalized length density", table_cell)],
+        [Paragraph("11", table_cell), Paragraph("min norm tf", table_cell), Paragraph("+0.0434", table_cell), Paragraph("+3.168729", table_cell), Paragraph("Consistent density reward", table_cell)],
+        [Paragraph("12", table_cell), Paragraph("max norm tf", table_cell), Paragraph("<b>+0.1270</b>", table_cell), Paragraph("+6.223214", table_cell), Paragraph("Topical term concentration", table_cell)],
+        [Paragraph("13", table_cell), Paragraph("mean norm tf", table_cell), Paragraph("-0.0787", table_cell), Paragraph("-14.531490", table_cell), Paragraph("Redundant density regularizer", table_cell)],
+        [Paragraph("14", table_cell), Paragraph("variance norm tf", table_cell), Paragraph("-0.1050", table_cell), Paragraph("-468.125341", table_cell), Paragraph("Penalizes density spikes", table_cell)],
+        [Paragraph("15", table_cell), Paragraph("sum of tf*idf", table_cell), Paragraph("+0.0334", table_cell), Paragraph("+0.002689", table_cell), Paragraph("Composite relevance prior", table_cell)],
+        [Paragraph("16", table_cell), Paragraph("min of tf*idf", table_cell), Paragraph("-0.2059", table_cell), Paragraph("-0.059297", table_cell), Paragraph("Collinear negative stabilizer", table_cell)],
+        [Paragraph("17", table_cell), Paragraph("max of tf*idf", table_cell), Paragraph("-0.2610", table_cell), Paragraph("-0.043541", table_cell), Paragraph("Collinear negative stabilizer", table_cell)],
+        [Paragraph("18", table_cell), Paragraph("mean of tf*idf", table_cell), Paragraph("+0.0447", table_cell), Paragraph("+0.033947", table_cell), Paragraph("Positive discriminative signal", table_cell)],
+        [Paragraph("19", table_cell), Paragraph("variance of tf*idf", table_cell), Paragraph("<b>+0.1780</b>", table_cell), Paragraph("+0.008587", table_cell), Paragraph("Rewards distinctive keywords", table_cell)],
+        [Paragraph("20", table_cell), Paragraph("boolean model", table_cell), Paragraph("-0.0191", table_cell), Paragraph("-0.012190", table_cell), Paragraph("Neutralized coordinate match", table_cell)],
+        [Paragraph("21", table_cell), Paragraph("vector space model", table_cell), Paragraph("<b>+0.2171</b>", table_cell), Paragraph("+3.169704", table_cell), Paragraph("Primary cosine alignment driver", table_cell)],
+        [Paragraph("22", table_cell), Paragraph("BM25", table_cell), Paragraph("<b>+0.2059</b>", table_cell), Paragraph("+0.043650", table_cell), Paragraph("Strong probabilistic anchor", table_cell)],
+        [Paragraph("23", table_cell), Paragraph("Intercept / Bias (b)", table_cell), Paragraph("-0.1166", table_cell), Paragraph("+0.233543", table_cell), Paragraph("Decision boundary offset", table_cell)],
     ]
     wt = Table(weights_table_data, colWidths=[18, 132, 115, 95, 144])
     wt.setStyle(TableStyle([
@@ -501,17 +501,17 @@ def build_pdf_report(filename="IR_PA3.pdf"):
 
     results_table_data = [
         [Paragraph("<b>Evaluation Metric</b>", table_header), Paragraph("<b>Pure BM25<br/>Baseline</b>", table_header), Paragraph("<b>Method A<br/>(Zone Scoring)</b>", table_header), Paragraph("<b>Method B<br/>(Linear SVM LTR)</b>", table_header), Paragraph("<b>A vs. Base<br/>(%)</b>", table_header), Paragraph("<b>B vs. Base<br/>(%)</b>", table_header)],
-        [Paragraph("<b>P@5</b>", table_cell), Paragraph("<b>0.4578</b>", table_cell), Paragraph("0.4000", table_cell), Paragraph("0.3956", table_cell), Paragraph("-12.63%", table_cell), Paragraph("-13.59%", table_cell)],
-        [Paragraph("<b>P@10</b>", table_cell), Paragraph("<b>0.3089</b>", table_cell), Paragraph("0.2644", table_cell), Paragraph("0.2600", table_cell), Paragraph("-14.41%", table_cell), Paragraph("-15.83%", table_cell)],
-        [Paragraph("<b>P@20</b>", table_cell), Paragraph("<b>0.1956</b>", table_cell), Paragraph("0.1678", table_cell), Paragraph("0.1611", table_cell), Paragraph("-14.21%", table_cell), Paragraph("-17.64%", table_cell)],
-        [Paragraph("<b>R@5</b>", table_cell), Paragraph("<b>0.3698</b>", table_cell), Paragraph("0.3207", table_cell), Paragraph("0.3317", table_cell), Paragraph("-13.28%", table_cell), Paragraph("-10.30%", table_cell)],
-        [Paragraph("<b>R@10</b>", table_cell), Paragraph("<b>0.4812</b>", table_cell), Paragraph("0.4141", table_cell), Paragraph("0.4275", table_cell), Paragraph("-13.94%", table_cell), Paragraph("-11.16%", table_cell)],
-        [Paragraph("<b>R@20</b>", table_cell), Paragraph("<b>0.5864</b>", table_cell), Paragraph("0.5265", table_cell), Paragraph("0.5126", table_cell), Paragraph("-10.21%", table_cell), Paragraph("-12.59%", table_cell)],
-        [Paragraph("<b>F1@5</b>", table_cell), Paragraph("<b>0.3795</b>", table_cell), Paragraph("0.3338", table_cell), Paragraph("0.3353", table_cell), Paragraph("-12.04%", table_cell), Paragraph("-11.65%", table_cell)],
-        [Paragraph("<b>F1@10</b>", table_cell), Paragraph("<b>0.3500</b>", table_cell), Paragraph("0.3033", table_cell), Paragraph("0.3034", table_cell), Paragraph("-13.34%", table_cell), Paragraph("-13.31%", table_cell)],
-        [Paragraph("<b>F1@20</b>", table_cell), Paragraph("<b>0.2759</b>", table_cell), Paragraph("0.2416", table_cell), Paragraph("0.2335", table_cell), Paragraph("-12.43%", table_cell), Paragraph("-15.37%", table_cell)],
-        [Paragraph("<b>MAP (@100)</b>", table_cell), Paragraph("<b>0.4291</b>", table_cell), Paragraph("0.3473", table_cell), Paragraph("0.3766", table_cell), Paragraph("-19.06%", table_cell), Paragraph("-12.23%", table_cell)],
-        [Paragraph("<b>MRR</b>", table_cell), Paragraph("<b>0.8310</b>", table_cell), Paragraph("0.7145", table_cell), Paragraph("<b>0.8193</b>", table_cell), Paragraph("-14.02%", table_cell), Paragraph("<b>-1.41%</b>", table_cell)],
+        [Paragraph("<b>P@5</b>", table_cell), Paragraph("<b>0.4578</b>", table_cell), Paragraph("0.4000", table_cell), Paragraph("0.3867", table_cell), Paragraph("-12.63%", table_cell), Paragraph("-15.53%", table_cell)],
+        [Paragraph("<b>P@10</b>", table_cell), Paragraph("<b>0.3089</b>", table_cell), Paragraph("0.2644", table_cell), Paragraph("0.2644", table_cell), Paragraph("-14.41%", table_cell), Paragraph("-14.41%", table_cell)],
+        [Paragraph("<b>P@20</b>", table_cell), Paragraph("<b>0.1956</b>", table_cell), Paragraph("0.1678", table_cell), Paragraph("0.1667", table_cell), Paragraph("-14.21%", table_cell), Paragraph("-14.78%", table_cell)],
+        [Paragraph("<b>R@5</b>", table_cell), Paragraph("<b>0.3698</b>", table_cell), Paragraph("0.3207", table_cell), Paragraph("0.3259", table_cell), Paragraph("-13.28%", table_cell), Paragraph("-11.87%", table_cell)],
+        [Paragraph("<b>R@10</b>", table_cell), Paragraph("<b>0.4812</b>", table_cell), Paragraph("0.4141", table_cell), Paragraph("0.4272", table_cell), Paragraph("-13.94%", table_cell), Paragraph("-11.22%", table_cell)],
+        [Paragraph("<b>R@20</b>", table_cell), Paragraph("<b>0.5864</b>", table_cell), Paragraph("0.5265", table_cell), Paragraph("0.5295", table_cell), Paragraph("-10.21%", table_cell), Paragraph("-9.70%", table_cell)],
+        [Paragraph("<b>F1@5</b>", table_cell), Paragraph("<b>0.3795</b>", table_cell), Paragraph("0.3338", table_cell), Paragraph("0.3282", table_cell), Paragraph("-12.04%", table_cell), Paragraph("-13.52%", table_cell)],
+        [Paragraph("<b>F1@10</b>", table_cell), Paragraph("<b>0.3500</b>", table_cell), Paragraph("0.3033", table_cell), Paragraph("0.3066", table_cell), Paragraph("-13.34%", table_cell), Paragraph("-12.40%", table_cell)],
+        [Paragraph("<b>F1@20</b>", table_cell), Paragraph("<b>0.2759</b>", table_cell), Paragraph("0.2416", table_cell), Paragraph("0.2406", table_cell), Paragraph("-12.43%", table_cell), Paragraph("-12.79%", table_cell)],
+        [Paragraph("<b>MAP (@100)</b>", table_cell), Paragraph("<b>0.4291</b>", table_cell), Paragraph("0.3473", table_cell), Paragraph("0.3926", table_cell), Paragraph("-19.06%", table_cell), Paragraph("-8.51%", table_cell)],
+        [Paragraph("<b>MRR</b>", table_cell), Paragraph("0.8310", table_cell), Paragraph("0.7145", table_cell), Paragraph("<b>0.8346</b>", table_cell), Paragraph("-14.02%", table_cell), Paragraph("<b>+0.43%</b>", table_cell)],
     ]
     res_t = Table(results_table_data, colWidths=[90, 75, 105, 115, 60, 59])
     res_t.setStyle(TableStyle([
@@ -636,9 +636,10 @@ def build_pdf_report(filename="IR_PA3.pdf"):
         story.append(Image('./figures/svm_c_sensitivity.png', width=3.8*inch, height=2.3*inch))
         story.append(Paragraph("<b>Figure 8:</b> Regularization parameter sensitivity curve across C in [1e-4, 1.0].", caption_style))
 
-    story.append(Paragraph("<b>Query-Level Empirical Case Studies:</b>", h2_style))
-    story.append(Paragraph("• <b>Query 10 (<i>'real-gas transport properties for air over enthalpies'</i>):</b> Both BM25 and Method B successfully place primary reference Doc 493 at Rank 0 (BM25: 30.52, SVM: 1.08), whereas Method A assigns it to Rank 1 because its title lacks the keyword 'real-gas'.", bullet_style))
-    story.append(Paragraph("• <b>Query 41 (<i>'steady flow of an incompressible viscous fluid past a sphere'</i>):</b> Method B promotes relevant Doc 750 from Rank 6 in BM25 (15.34) to Rank 1 (0.742) due to high normalized term frequency (sum norm tf: +0.1690) and coordinate overlap.", bullet_style))
+    story.append(Paragraph("<b>Query-Level Empirical Case Studies (Verified on 45 Test Queries):</b>", h2_style))
+    story.append(Paragraph("• <b>Query 16 (<i>'transverse potential flow past a body of revolution'</i>):</b> Relevant Doc 106 matches the title almost verbatim. While BM25 placed Doc 498 at Rank 0 and Doc 106 at Rank 1, both Method A (score 0.5278) and Method B (score 1.0434) successfully promote Doc 106 to Rank 0.", bullet_style))
+    story.append(Paragraph("• <b>Query 97 (<i>'dynamic response of airplanes to gusts in subsonic regime'</i>):</b> Relevant Doc 779 is ranked at Rank 2 by BM25 (score 22.24) and Rank 3 by Method A. Method B promotes Doc 779 to Rank 0 (score 0.1262) due to high cosine alignment and abstract density.", bullet_style))
+    story.append(Paragraph("• <b>Query 10 (<i>'real-gas transport properties for air over enthalpies'</i>):</b> Both BM25 and Method B rank primary Doc 493 at Rank 0 and Doc 302 at Rank 1. Method A inverts them, ranking Doc 302 at Rank 0 (0.3250) and Doc 493 at Rank 1 (0.3100) because Doc 302 matches 3 title terms vs. 2.", bullet_style))
 
     story.append(Spacer(1, 4))
     story.append(Paragraph("7. Conclusion & Student Learning Outcomes", h1_style))
@@ -649,7 +650,7 @@ def build_pdf_report(filename="IR_PA3.pdf"):
     ))
     story.append(Paragraph("<b>1. Custom SGML Parsing Integrity:</b> Resolving the query ID numbering discrepancy between <code>cran.qry</code> and <code>cranqrel</code> was vital for 100% judgment alignment.", bullet_style))
     story.append(Paragraph("<b>2. Zone Weighting Efficacy:</b> Simplex grid search proved that Title (0.55) and Body (0.40) dominate retrieval, while Author (0.00) was correctly eliminated.", bullet_style))
-    story.append(Paragraph("<b>3. Supervised LTR Strengths:</b> A 22-feature Linear SVM learned fine-grained density weights, achieving an outstanding MRR of 0.8193.", bullet_style))
+    story.append(Paragraph("<b>3. Supervised LTR Strengths:</b> A 22-feature Linear SVM learned fine-grained density weights, achieving an outstanding MRR of 0.8346 (surpassing BM25's 0.8310).", bullet_style))
     story.append(Paragraph("<b>4. Non-Linear Saturation Importance:</b> We gained first-hand theoretical insight into why BM25's concave saturation curve makes it a formidable baseline against linear hyperplanes.", bullet_style))
 
     # Build document

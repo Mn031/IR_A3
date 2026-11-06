@@ -65,15 +65,15 @@ def main():
     method_a_scorer = BooleanWeightedZoneScorer(stats=stats, weights=best_weights, scoring_mode="fraction")
 
     # 3. Method B (Linear SVM LTR with pre-learned weights)
-    # Learned weights and intercept from Cranfield training set (C=0.01)
+    # Learned weights and intercept from Cranfield training set (C=0.01, corrected features)
     best_raw_weights = np.array([
-        -0.029526, -0.891322,  0.000091,  0.034584,  0.019011,
-         0.055061, -0.035887,  0.061225, -0.047394,  3.343976,
-         1.719580,  7.613548,  1.460665, -644.390781, 0.009845,
-        -0.057138, -0.034303,  0.125295,  0.008410, -0.148140,
-         0.375203,  0.001886
+        -0.041424, -1.791588,  0.000662, -0.014053,  0.000750,
+         0.052758, -0.009025,  0.323499, -0.038346,  1.660487,
+         3.168729,  6.223214, -14.531490, -468.125341, 0.002689,
+        -0.059297, -0.043541,  0.033947,  0.008587, -0.012190,
+         3.169704,  0.043650
     ], dtype=np.float32)
-    best_raw_intercept = 0.187820
+    best_raw_intercept = 0.233543
 
     model_file = os.path.join("results", "svm_model.joblib")
     if not os.path.exists(model_file):

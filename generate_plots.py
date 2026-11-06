@@ -38,15 +38,15 @@ plt.rcParams['figure.titlesize'] = 13
 cutoffs = [5, 10, 20]
 bm25_p = [0.4578, 0.3089, 0.1956]
 method_a_p = [0.4000, 0.2644, 0.1678]
-method_b_p = [0.3956, 0.2600, 0.1611]
+method_b_p = [0.3867, 0.2644, 0.1667]
 
 bm25_r = [0.3698, 0.4812, 0.5864]
 method_a_r = [0.3207, 0.4141, 0.5265]
-method_b_r = [0.3317, 0.4275, 0.5126]
+method_b_r = [0.3259, 0.4272, 0.5295]
 
 bm25_f1 = [0.3795, 0.3500, 0.2759]
 method_a_f1 = [0.3338, 0.3033, 0.2416]
-method_b_f1 = [0.3353, 0.3034, 0.2335]
+method_b_f1 = [0.3282, 0.3066, 0.2406]
 
 c_bm25 = '#1E3A8A'   # Navy
 c_meth_a = '#0D9488' # Teal
@@ -137,8 +137,8 @@ plt.close()
 # -------------------------------------------------------------
 fig, ax = plt.subplots(figsize=(6.5, 4.2), dpi=300)
 models = ['BM25 Baseline', 'Method A\n(Weighted Zone)', 'Method B\n(Linear SVM LTR)']
-map_scores = [0.4291, 0.3546, 0.3766]
-mrr_scores = [0.8310, 0.7145, 0.8193]
+map_scores = [0.4291, 0.3473, 0.3926]
+mrr_scores = [0.8310, 0.7145, 0.8346]
 
 x_m = np.arange(len(models))
 w_m = 0.35
@@ -197,28 +197,28 @@ plt.close()
 # FIGURE 6: Method B 22-Feature Standardized Weights Bar Chart
 # -------------------------------------------------------------
 features_list = [
-    ("query term number", -0.1175),
-    ("query term ratio", -0.1415),
-    ("stream length", 0.0051),
-    ("idf", 0.1349),
-    ("sum of term frequency", 0.1103),
-    ("min of term frequency", 0.0659),
-    ("max of term frequency", -0.0846),
-    ("mean of term frequency", 0.0369),
-    ("variance of term frequency", -0.1516),
-    ("sum norm tf", 0.1690),
-    ("min norm tf", 0.0236),
-    ("max norm tf", 0.1553),
-    ("mean norm tf", 0.0079),
-    ("variance norm tf", -0.1445),
-    ("sum of tf*idf", 0.1225),
-    ("min of tf*idf", -0.1984),
-    ("max of tf*idf", -0.2057),
-    ("mean of tf*idf", 0.1648),
-    ("variance of tf*idf", 0.1743),
-    ("boolean model", -0.2520),
-    ("vector space model", 0.0297),
-    ("BM25", 0.0097),
+    ("query term number", -0.1648),
+    ("query term ratio", -0.2844),
+    ("stream length", 0.0369),
+    ("idf", -0.0507),
+    ("sum of term frequency", 0.0044),
+    ("min of term frequency", 0.0631),
+    ("max of term frequency", -0.0213),
+    ("mean of term frequency", 0.1949),
+    ("variance of term frequency", -0.1227),
+    ("sum norm tf", 0.0839),
+    ("min norm tf", 0.0434),
+    ("max norm tf", 0.1270),
+    ("mean norm tf", -0.0787),
+    ("variance norm tf", -0.1050),
+    ("sum of tf*idf", 0.0334),
+    ("min of tf*idf", -0.2059),
+    ("max of tf*idf", -0.2610),
+    ("mean of tf*idf", 0.0447),
+    ("variance of tf*idf", 0.1780),
+    ("boolean model", -0.0191),
+    ("vector space model", 0.2171),
+    ("BM25", 0.2059),
 ]
 
 features_list_sorted = sorted(features_list, key=lambda x: x[1])
