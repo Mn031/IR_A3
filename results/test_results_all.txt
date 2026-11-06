@@ -1,11 +1,13 @@
 # CRANFIELD LEARNING TO RANK: TEST QUERY EVALUATION RESULTS
 # Split Ratio: 80% Train (180 queries) / 20% Test (45 queries)
 
-=== COMPARATIVE EVALUATION TABLE ===
-                              P@5    P@10    P@20     R@5    R@10    R@20    F1@5   F1@10   F1@20     MAP     MRR
+=== COMPARATIVE EVALUATION TABLE (Consistent Depth: Top-100) ===
+                               P@5    P@10    P@20     R@5    R@10    R@20    F1@5   F1@10   F1@20     MAP     MRR
 BM25 Baseline              0.4578  0.3089  0.1956  0.3698  0.4812  0.5864  0.3795  0.3500  0.2759  0.4291  0.8310
-Method A (Weighted Zone)   0.4000  0.2644  0.1678  0.3207  0.4141  0.5265  0.3338  0.3033  0.2416  0.3546  0.7145
+Method A (Weighted Zone)   0.4000  0.2644  0.1678  0.3207  0.4141  0.5265  0.3338  0.3033  0.2416  0.3473  0.7145
 Method B (Linear SVM LTR)  0.3956  0.2600  0.1611  0.3317  0.4275  0.5126  0.3353  0.3034  0.2335  0.3766  0.8193
+
+Note: Evaluated across all 45 test queries at depth 100. (Method A over full 1,400-doc corpus yields MAP = 0.3546).
 
 === METHOD A OPTIMAL ZONE WEIGHTS ===
 Title: 0.5500, Author: 0.0000, Bibliography: 0.0500, Body: 0.4000

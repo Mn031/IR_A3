@@ -418,13 +418,19 @@ Table~\ref{tab:master_results} presents the comparative evaluation across all th
 
 \begin{table}[H]
 \centering
-\caption{Comprehensive Performance Comparison on 45 Test Queries across Precision, Recall, F1, MAP, and MRR}
+\caption{Comprehensive Performance Comparison on 45 Test Queries (Evaluated at Rank Depth 100)}
 \label{tab:master_results}
 \small
+\setlength{\tabcolsep}{4.5pt}
 \renewcommand{\arraystretch}{1.2}
-\begin{tabularx}{\textwidth}{lccccc}
+\begin{tabularx}{\textwidth}{l c c c c c}
 \toprule
-\textbf{Evaluation Metric} & \textbf{Pure BM25 Baseline} & \textbf{Method A (Zone Scoring)} & \textbf{Method B (Linear SVM LTR)} & \textbf{$\Delta$ (A vs. Base)} & \textbf{$\Delta$ (B vs. Base)} \\
+\textbf{Evaluation Metric} & 
+\textbf{\shortstack{Pure BM25 \\ Baseline}} & 
+\textbf{\shortstack{Method A \\ (Zone Scoring)}} & 
+\textbf{\shortstack{Method B \\ (Linear SVM LTR)}} & 
+\textbf{\shortstack{$\Delta$ (A vs. \\ Base)}} & 
+\textbf{\shortstack{$\Delta$ (B vs. \\ Base)}} \\
 \midrule
 \textbf{Precision@5} & \textbf{0.4578} & 0.4000 & 0.3956 & -12.63\% & -13.59\% \\
 \textbf{Precision@10} & \textbf{0.3089} & 0.2644 & 0.2600 & -14.41\% & -15.83\% \\
@@ -438,10 +444,12 @@ Table~\ref{tab:master_results} presents the comparative evaluation across all th
 \textbf{F1 Score@10} & \textbf{0.3500} & 0.3033 & 0.3034 & -13.34\% & -13.31\% \\
 \textbf{F1 Score@20} & \textbf{0.2759} & 0.2416 & 0.2335 & -12.43\% & -15.37\% \\
 \midrule
-\textbf{Mean Avg Precision (MAP)} & \textbf{0.4291} & 0.3546 & 0.3766 & -17.36\% & -12.23\% \\
+\textbf{Mean Avg Precision (MAP@100)} & \textbf{0.4291} & 0.3473 & 0.3766 & -19.06\% & -12.23\% \\
 \textbf{Mean Reciprocal Rank (MRR)} & \textbf{0.8310} & 0.7145 & \textbf{0.8193} & -14.02\% & \textbf{-1.41\%} \\
 \bottomrule
 \end{tabularx}
+\vspace{0.3em}
+\footnotesize{\textit{Note: All three models are evaluated at a consistent candidate retrieval depth of top 100 documents. If Method A is evaluated across the unconstrained full collection (all 1,400 documents), its MAP is 0.3546.}}
 \end{table}
 
 \subsection{Graphical Evaluation Analysis}
@@ -595,9 +603,9 @@ $C = 1.0000$ & 0.2600 & 0.4275 & 0.3034 & 0.3736 & 0.8193 \\
 
 \subsection{Query-Level Error Case Studies}
 \begin{itemize}[leftmargin=*]
-    \item \textbf{Query 10 (\textit{``turbulent couette flow behaviour''}):} Method B successfully boosted document 493 from rank 3 (BM25) to rank 0, because high cosine similarity and peak normalized term frequency correctly identified it as the primary reference.
-    \item \textbf{Query 32 (\textit{``hypersonic shock wave interaction''}):} Method A achieved P@5 = 0.8000, outperforming BM25 because the exact query keywords appeared verbatim in the title, maximizing the 55\% title weight.
-    \item \textbf{Long Exploratory Queries:} BM25 outperformed both methods on complex multi-clause inquiries, where document length variations were substantial, proving the robustness of the length normalization parameter $b = 0.75$.
+    \item \textbf{Query 10 (\textit{``real-gas transport properties for air over wide range of enthalpies''}):} Both BM25 and Method B successfully place primary reference \textbf{Doc 493} at Rank 0 (BM25 score 30.52, SVM score 1.08), reflecting strong lexical alignment across density and enthalpy terms. In contrast, Method A places Doc 493 at Rank 1 (score 0.31) because its title lacks the specific phrase \textit{``real-gas''}, causing Title zone scoring to favor Doc 302.
+    \item \textbf{Query 41 (\textit{``steady flow of an incompressible viscous fluid past a sphere''}):} Method B successfully promotes relevant \textbf{Doc 750} from Rank 6 in BM25 (score 15.34) into the top positions (SVM score 0.742) by leveraging high normalized term frequency (\texttt{sum\_norm\_tf} = +0.1690) and coordinate coverage across the fluid mechanics terminology.
+    \item \textbf{Long Exploratory Queries:} Pure BM25 maintains superior average recall on verbose multi-clause inquiries, where document length variations are pronounced, due to its concave sublinear term frequency saturation curve ($tf / (tf + k_1)$) and length dampening ($b = 0.75$).
 \end{itemize}
 
 % =========================================================================

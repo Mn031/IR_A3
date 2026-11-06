@@ -64,14 +64,33 @@ def main():
     best_weights = np.array([0.55, 0.00, 0.05, 0.40], dtype=np.float32)
     method_a_scorer = BooleanWeightedZoneScorer(stats=stats, weights=best_weights, scoring_mode="fraction")
 
-    # 3. Method B (Linear SVM LTR)
-    qrels_file = os.path.join(args.data_dir, "cranqrel")
-    qrels = CranfieldParser.parse_qrels(qrels_file)
-    train_queries, _, train_qrels, _ = CranfieldParser.train_test_split(queries, qrels, test_ratio=0.20, random_state=42)
+    # 3. Method B (Linear SVM LTR with pre-learned weights)
+    # Learned weights and intercept from Cranfield training set (C=0.01)
+    best_raw_weights = np.array([
+        -0.029526, -0.891322,  0.000091,  0.034584,  0.019011,
+         0.055061, -0.035887,  0.061225, -0.047394,  3.343976,
+         1.719580,  7.613548,  1.460665, -644.390781, 0.009845,
+        -0.057138, -0.034303,  0.125295,  0.008410, -0.148140,
+         0.375203,  0.001886
+    ], dtype=np.float32)
+    best_raw_intercept = 0.187820
 
-    svm_ltr = SVMLearningToRank(stats=stats, candidate_retriever=baseline_model.get_pyterrier_transformer(), C=0.01)
-    print("Training SVM LTR re-ranker on base training set...")
-    svm_ltr.fit(train_queries, train_qrels)
+    model_file = os.path.join("results", "svm_model.joblib")
+    if not os.path.exists(model_file):
+        model_file = os.path.join(args.data_dir, "svm_model.joblib")
+
+    if os.path.exists(model_file):
+        print(f"Loading pre-trained Linear SVM model from {model_file}...")
+        svm_ltr = SVMLearningToRank(stats=stats, candidate_retriever=baseline_model.get_pyterrier_transformer(), C=0.01)
+        svm_ltr.load(model_file)
+    else:
+        print("Instantiating Linear SVM LTR model from pre-learned weights...")
+        svm_ltr = SVMLearningToRank.from_pretrained(
+            stats=stats,
+            candidate_retriever=baseline_model.get_pyterrier_transformer(),
+            raw_weights=best_raw_weights,
+            raw_intercept=best_raw_intercept
+        )
 
     results_to_save = {}
 

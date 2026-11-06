@@ -168,15 +168,23 @@ def main():
     method_b_test_results = svm_ltr.rank_test_queries(test_queries=test_queries)
     print(f"  * Method B re-ranked {len(method_b_test_results)} candidate pairs.")
 
+    # Save trained SVM model for fast unknown query evaluation
+    svm_model_path = os.path.join(args.output_dir, "svm_model.joblib")
+    svm_ltr.save(svm_model_path)
+    print(f"  * Saved trained SVM LTR model to: {svm_model_path}")
+
     # ---------------------------------------------------------
     # Step 6: Comprehensive Metric Evaluation
     # ---------------------------------------------------------
-    print("\n[Step 7] Evaluating Retrieval Performance on Test Queries...")
+    print("\n[Step 7] Evaluating Retrieval Performance on Test Queries (Consistent Depth: Top-100)...")
     evaluator = RetrievalEvaluator(qrels=test_qrels, cutoffs=[5, 10, 20])
+
+    # Ensure consistent evaluation depth (top 100) across all compared models
+    method_a_top100 = method_a_test_results.sort_values(['qid', 'rank']).groupby('qid').head(100).reset_index(drop=True)
 
     model_dict = {
         'BM25 Baseline': baseline_test_results,
-        'Method A (Weighted Zone)': method_a_test_results,
+        'Method A (Weighted Zone)': method_a_top100,
         'Method B (Linear SVM LTR)': method_b_test_results
     }
 

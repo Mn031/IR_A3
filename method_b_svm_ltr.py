@@ -92,6 +92,7 @@ class FeatureExtractor:
 
         # Matching terms and frequencies
         matching_terms = [t for t in query_tokens if t in doc_tf]
+        unique_matching = set(matching_terms)
         tfs = [doc_tf.get(t, 0) for t in query_tokens]
         matching_tfs = [doc_tf[t] for t in matching_terms]
 
@@ -110,8 +111,8 @@ class FeatureExtractor:
         f2 = float(len(matching_terms) / q_len)
         # 3. stream length
         f3 = float(doc_len)
-        # 4. idf (sum of IDF for matching query terms)
-        f4 = float(sum(self.stats.get_idf(t) for t in matching_terms))
+        # 4. idf (sum of IDF for distinct matching query terms)
+        f4 = float(sum(self.stats.get_idf(t) for t in unique_matching))
 
         # 5. sum of term frequency
         f5 = float(sum(tfs))
@@ -147,14 +148,17 @@ class FeatureExtractor:
         f19 = float(np.var(tfidfs)) if tfidfs else 0.0
 
         # 20. boolean model (coordinate term overlap)
-        f20 = float(len(matching_terms))
+        unique_matching = set(matching_terms)
+        f20 = float(len(unique_matching))
 
         # 21. vector space model (cosine similarity)
         q_tf = Counter(query_tokens)
         q_norm = math.sqrt(sum((q_tf[t] * self.stats.get_idf(t)) ** 2 for t in q_tf))
         d_norm = self.stats.doc_vsm_norms.get(doc_id, 1.0)
-        dot_prod = sum((q_tf[t] * self.stats.get_idf(t)) * (doc_tf[t] * self.stats.get_idf(t)) for t in matching_terms)
+        dot_prod = sum((q_tf[t] * self.stats.get_idf(t)) * (doc_tf[t] * self.stats.get_idf(t)) for t in unique_matching)
         f21 = float(dot_prod / (q_norm * d_norm)) if (q_norm > 0 and d_norm > 0) else 0.0
+        # Guard against minor floating point precision overshooting 1.0
+        f21 = min(1.0, max(0.0, f21))
 
         # 22. BM25 score
         k1 = self.k1
@@ -163,7 +167,7 @@ class FeatureExtractor:
         f22 = float(sum(
             self.stats.get_idf(t) * (doc_tf[t] * (k1 + 1.0)) /
             (doc_tf[t] + k1 * (1.0 - b + b * (doc_len / avgdl)))
-            for t in matching_terms
+            for t in unique_matching
         ))
 
         return np.array([
@@ -231,6 +235,16 @@ class LinearSVMScorer(BaseEstimator):
             return X @ self.raw_weights + self.raw_intercept
         X_scaled = self.scaler.transform(X)
         return self.model.decision_function(X_scaled)
+
+    @classmethod
+    def from_pretrained_weights(cls, raw_weights: np.ndarray, raw_intercept: float):
+        """
+        Constructs a LinearSVMScorer directly from pre-learned weights and intercept.
+        """
+        scorer = cls()
+        scorer.raw_weights = np.array(raw_weights, dtype=np.float32)
+        scorer.raw_intercept = float(raw_intercept)
+        return scorer
 
     def get_learned_weights_summary(self) -> pd.DataFrame:
         """
@@ -347,4 +361,32 @@ class SVMLearningToRank:
         ranked_res = ranked_res.sort_values(['qid', 'score'], ascending=[True, False]).reset_index(drop=True)
         ranked_res['rank'] = ranked_res.groupby('qid').cumcount()
         return ranked_res
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        stats: CranfieldCorpusStats,
+        candidate_retriever: pt.Transformer,
+        raw_weights: np.ndarray,
+        raw_intercept: float
+    ):
+        """
+        Instantiates SVMLearningToRank with pre-learned weights for zero-leakage inference.
+        """
+        ltr = cls(stats=stats, candidate_retriever=candidate_retriever)
+        ltr.scorer = LinearSVMScorer.from_pretrained_weights(raw_weights, raw_intercept)
+        ltr.is_fitted = True
+        return ltr
+
+    def save(self, filepath: str):
+        """Saves the trained LinearSVMScorer to a joblib file."""
+        import joblib
+        os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+        joblib.dump(self.scorer, filepath)
+
+    def load(self, filepath: str):
+        """Loads a pre-trained LinearSVMScorer from a joblib file."""
+        import joblib
+        self.scorer = joblib.load(filepath)
+        self.is_fitted = True
 

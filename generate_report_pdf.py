@@ -64,7 +64,7 @@ class NumberedCanvas(canvas.Canvas):
         self.restoreState()
 
 
-def build_pdf_report(filename="IR_PA3_Report.pdf"):
+def build_pdf_report(filename="IR_PA3.pdf"):
     doc = SimpleDocTemplate(
         filename,
         pagesize=letter,
@@ -500,7 +500,7 @@ def build_pdf_report(filename="IR_PA3_Report.pdf"):
     ))
 
     results_table_data = [
-        [Paragraph("<b>Evaluation Metric</b>", table_header), Paragraph("<b>BM25 Baseline</b>", table_header), Paragraph("<b>Method A (Zone Scoring)</b>", table_header), Paragraph("<b>Method B (Linear SVM LTR)</b>", table_header), Paragraph("<b>A vs. Base (%)</b>", table_header), Paragraph("<b>B vs. Base (%)</b>", table_header)],
+        [Paragraph("<b>Evaluation Metric</b>", table_header), Paragraph("<b>Pure BM25<br/>Baseline</b>", table_header), Paragraph("<b>Method A<br/>(Zone Scoring)</b>", table_header), Paragraph("<b>Method B<br/>(Linear SVM LTR)</b>", table_header), Paragraph("<b>A vs. Base<br/>(%)</b>", table_header), Paragraph("<b>B vs. Base<br/>(%)</b>", table_header)],
         [Paragraph("<b>P@5</b>", table_cell), Paragraph("<b>0.4578</b>", table_cell), Paragraph("0.4000", table_cell), Paragraph("0.3956", table_cell), Paragraph("-12.63%", table_cell), Paragraph("-13.59%", table_cell)],
         [Paragraph("<b>P@10</b>", table_cell), Paragraph("<b>0.3089</b>", table_cell), Paragraph("0.2644", table_cell), Paragraph("0.2600", table_cell), Paragraph("-14.41%", table_cell), Paragraph("-15.83%", table_cell)],
         [Paragraph("<b>P@20</b>", table_cell), Paragraph("<b>0.1956</b>", table_cell), Paragraph("0.1678", table_cell), Paragraph("0.1611", table_cell), Paragraph("-14.21%", table_cell), Paragraph("-17.64%", table_cell)],
@@ -510,10 +510,10 @@ def build_pdf_report(filename="IR_PA3_Report.pdf"):
         [Paragraph("<b>F1@5</b>", table_cell), Paragraph("<b>0.3795</b>", table_cell), Paragraph("0.3338", table_cell), Paragraph("0.3353", table_cell), Paragraph("-12.04%", table_cell), Paragraph("-11.65%", table_cell)],
         [Paragraph("<b>F1@10</b>", table_cell), Paragraph("<b>0.3500</b>", table_cell), Paragraph("0.3033", table_cell), Paragraph("0.3034", table_cell), Paragraph("-13.34%", table_cell), Paragraph("-13.31%", table_cell)],
         [Paragraph("<b>F1@20</b>", table_cell), Paragraph("<b>0.2759</b>", table_cell), Paragraph("0.2416", table_cell), Paragraph("0.2335", table_cell), Paragraph("-12.43%", table_cell), Paragraph("-15.37%", table_cell)],
-        [Paragraph("<b>MAP</b>", table_cell), Paragraph("<b>0.4291</b>", table_cell), Paragraph("0.3546", table_cell), Paragraph("0.3766", table_cell), Paragraph("-17.36%", table_cell), Paragraph("-12.23%", table_cell)],
+        [Paragraph("<b>MAP (@100)</b>", table_cell), Paragraph("<b>0.4291</b>", table_cell), Paragraph("0.3473", table_cell), Paragraph("0.3766", table_cell), Paragraph("-19.06%", table_cell), Paragraph("-12.23%", table_cell)],
         [Paragraph("<b>MRR</b>", table_cell), Paragraph("<b>0.8310</b>", table_cell), Paragraph("0.7145", table_cell), Paragraph("<b>0.8193</b>", table_cell), Paragraph("-14.02%", table_cell), Paragraph("<b>-1.41%</b>", table_cell)],
     ]
-    res_t = Table(results_table_data, colWidths=[95, 75, 105, 110, 60, 59])
+    res_t = Table(results_table_data, colWidths=[90, 75, 105, 115, 60, 59])
     res_t.setStyle(TableStyle([
         ('LINEABOVE', (0, 0), (-1, 0), 1.0, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 0.6, colors.black),
@@ -522,7 +522,8 @@ def build_pdf_report(filename="IR_PA3_Report.pdf"):
         ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5),
     ]))
     story.append(res_t)
-    story.append(Spacer(1, 6))
+    story.append(Paragraph("<i>Note: Evaluated at uniform cutoff depth 100. Method A across full collection (1,400 docs) achieves MAP = 0.3546.</i>", caption_style))
+    story.append(Spacer(1, 4))
 
     # Add 2 side-by-side plots: Precision and Recall
     if os.path.exists('./figures/precision_comparison.png') and os.path.exists('./figures/recall_comparison.png'):
@@ -632,8 +633,12 @@ def build_pdf_report(filename="IR_PA3_Report.pdf"):
     story.append(Spacer(1, 4))
 
     if os.path.exists('./figures/svm_c_sensitivity.png'):
-        story.append(Image('./figures/svm_c_sensitivity.png', width=3.8*inch, height=2.4*inch))
+        story.append(Image('./figures/svm_c_sensitivity.png', width=3.8*inch, height=2.3*inch))
         story.append(Paragraph("<b>Figure 8:</b> Regularization parameter sensitivity curve across C in [1e-4, 1.0].", caption_style))
+
+    story.append(Paragraph("<b>Query-Level Empirical Case Studies:</b>", h2_style))
+    story.append(Paragraph("• <b>Query 10 (<i>'real-gas transport properties for air over enthalpies'</i>):</b> Both BM25 and Method B successfully place primary reference Doc 493 at Rank 0 (BM25: 30.52, SVM: 1.08), whereas Method A assigns it to Rank 1 because its title lacks the keyword 'real-gas'.", bullet_style))
+    story.append(Paragraph("• <b>Query 41 (<i>'steady flow of an incompressible viscous fluid past a sphere'</i>):</b> Method B promotes relevant Doc 750 from Rank 6 in BM25 (15.34) to Rank 1 (0.742) due to high normalized term frequency (sum norm tf: +0.1690) and coordinate overlap.", bullet_style))
 
     story.append(Spacer(1, 4))
     story.append(Paragraph("7. Conclusion & Student Learning Outcomes", h1_style))
