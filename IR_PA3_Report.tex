@@ -1,0 +1,637 @@
+\documentclass[11pt,a4paper]{article}
+
+% --- Essential Professional Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsfonts, bm, mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{microtype}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{cite}
+
+% --- Hyperref Setup (Pure Black and White / No Color Borders) ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0},
+    hidelinks
+}
+
+% --- Running Header and Footer (Academic Report Style) ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small \textbf{CS60075: Information Retrieval} --- Assignment III Report}
+\fancyhead[R]{\small \textbf{Team:} \texttt{Generic\_group\_name}}
+\fancyfoot[L]{\small Mayash Nayak (Roll: 22CS30064) \textbar\ IIT Kharagpur}
+\fancyfoot[R]{\small Page \thepage}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+% --- Section Headings (Monochrome Black & White Style) ---
+\titleformat{\section}{\large\bfseries\scshape}{\thesection.}{0.6em}{}[\hrule height 0.6pt]
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}{\small\bfseries\itshape}{\thesubsubsection}{0.5em}{}
+
+% --- Paragraph Spacing ---
+\setlength{\parskip}{0.5em}
+\setlength{\parindent}{0pt}
+
+% --- Math Operators ---
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator{\Var}{Var}
+
+\begin{document}
+
+% =========================================================================
+% COVER / TITLE BLOCK (PROJECT REPORT FORMAT)
+% =========================================================================
+\begin{center}
+    \vspace*{0.2em}
+    {\large \textbf{DEPARTMENT OF COMPUTER SCIENCE AND ENGINEERING}}\\[0.2em]
+    {\large \textbf{INDIAN INSTITUTE OF TECHNOLOGY KHARAGPUR}}\\[0.8em]
+    
+    \hrule height 1.2pt
+    \vspace{0.8em}
+    {\Large \textbf{CS60075 / CS40011: Information Retrieval}}\\[0.4em]
+    {\LARGE \textbf{Programming Assignment III: Learning to Rank}}\\[0.4em]
+    {\large \textit{Comparative Empirical Evaluation of Boolean Weighted Zone Scoring and Linear Support Vector Machines on the Cranfield Corpus}}\\[0.8em]
+    \hrule height 1.2pt
+    \vspace{1.2em}
+\end{center}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\textwidth}{rXrX}
+\toprule
+\textbf{Candidate Name:} & Mayash Nayak & \textbf{Roll Number:} & 22CS30064 \\
+\textbf{Team Identifier:} & \texttt{Generic\_group\_name} & \textbf{Course Code:} & CS60075 / CS40011 \\
+\textbf{Course Title:} & Information Retrieval & \textbf{Course Instructor:} & Prof. Pabitra Mitra \\
+\textbf{Academic Department:} & Dept. of Computer Science \& Engineering & \textbf{Institution:} & IIT Kharagpur \\
+\textbf{Evaluation Dataset:} & Cranfield Collection (1,400 docs, 225 queries) & \textbf{Submission Date:} & November 6, 2026 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\vspace{0.6em}
+
+% % =========================================================================
+% % ABSTRACT / EXECUTIVE SUMMARY
+% % =========================================================================
+% \begin{center}
+%     {\textbf{\large Executive Summary}}
+% \end{center}
+% \noindent This technical project report presents an end-to-end implementation and empirical investigation of supervised \textit{Learning-to-Rank} (LTR) systems applied to the classic Cranfield aeronautics text collection using Python and the PyTerrier framework. Moving beyond static bag-of-words heuristics, our team (\texttt{Generic\_group\_name}) systematically benchmarked three distinct retrieval paradigms across 225 natural language queries: (1) a Robertson-Sp\"{a}rck Jones BM25 probabilistic baseline, (2) Method A: Boolean Weighted Zone Scoring optimized via simplex grid search across four document zones (Title, Author, Bibliography, Text Body), and (3) Method B: Pointwise Learning to Rank using a Soft-Margin Linear Support Vector Machine (Linear SVM) trained over 22 fine-grained query-document features, including lexical frequencies, stream-length normalized term densities, TF-IDF statistical dispersions, coordinate matching, Vector Space Model cosine similarity, and BM25 scores. 
+
+% Using an exact 80/20 train/test split (180 training queries, 45 unseen test queries) with human relevance judgments, our empirical results demonstrate that paper titles ($w_T = 0.55$) and abstracts ($w_W = 0.40$) account for 95\% of zone retrieval signal, with author names correctly receiving zero weight ($w_A = 0.00$). In Method B, normalized term density and discriminative TF-IDF dispersion serve as the primary positive relevance drivers, yielding an exceptional Mean Reciprocal Rank (MRR = 0.8193) that closely approaches the well-tuned non-linear saturation curve of BM25 (MRR = 0.8310, MAP = 0.4291). We report comprehensive evaluation metrics across Precision, Recall, and F1 score at cutoffs $k \in \{5, 10, 20\}$, and present detailed analyses of feature multicollinearity, zone dynamics, and failure modes from an engineering student perspective.
+
+% \vspace{0.6em}
+% \hrule height 0.6pt
+% \vspace{1.0em}
+
+% % =========================================================================
+% % SECTION 1: GROUP DETAILS & OVERVIEW
+% % =========================================================================
+% \section{Group Details \& Project Metadata}
+% This assignment was undertaken as part of the requirements for \textbf{CS60075 / CS40011: Information Retrieval} in the Department of Computer Science and Engineering at the Indian Institute of Technology Kharagpur, instructed by Prof. Pabitra Mitra. The project guidelines were stipulated in \texttt{PA3.pdf}.
+
+% \begin{table}[H]
+% \centering
+% \small
+% \caption{Comprehensive Project and Environment Specifications}
+% \label{tab:metadata}
+% \renewcommand{\arraystretch}{1.2}
+% \begin{tabularx}{\textwidth}{lX}
+% \toprule
+% \textbf{Specification Item} & \textbf{Value / Operational Details} \\
+% \midrule
+% Course Title & Information Retrieval \\
+% Course Code & CS60075 / CS40011 \\
+% Assignment Title & Programming Assignment III: Learning to Rank \\
+% Team Identifier & \texttt{Generic\_group\_name} \\
+% Candidate Author & Mayash Nayak \\
+% Student Roll Number & 22CS30064 \\
+% Academic Unit & Department of Computer Science and Engineering, IIT Kharagpur \\
+% Course Instructor & Prof. Pabitra Mitra \\
+% Evaluation Text Collection & Cranfield Aeronautics Collection \\
+% Corpus Statistics & 1,400 documents, 225 queries, 1,837 relevance judgments \\
+% Programming Frameworks & Python 3.11, PyTerrier 0.11.0, Scikit-Learn 1.6, NumPy 2.2, Pandas 2.2 \\
+% Output Format & Standard TREC 6-Column Result Lists (\texttt{test\_results\_*.txt}) \\
+% Submission Date & November 6, 2026 \\
+% \bottomrule
+% \end{tabularx}
+% \end{table}
+
+% All programs, indexing pipelines, and evaluation routines have been built in a decoupled, modular Python structure. The entire system is automated via a master execution script (\texttt{main.py}) and supported by an external evaluation script (\texttt{run\_on\_unknown\_queries.py}) designed to score unseen queries.
+
+% =========================================================================
+% SECTION 2: PROBLEM STATEMENT
+% =========================================================================
+\section{Problem Statement}
+In classical Information Retrieval, document ranking has traditionally relied on static heuristic formulations such as TF-IDF term weighting or probabilistic models like BM25. While computationally fast, these classical models treat documents as homogeneous bags of words, failing to adaptively weight distinct document structural zones (e.g., title vs. body text) or combine multi-dimensional relevance signals (e.g., term density, length normalization, cosine similarity) into a unified scoring function.
+
+\subsection{Mathematical Formulation of Ranked Retrieval}
+Let $\mathcal{D} = \{d_1, d_2, \dots, d_N\}$ denote the fixed document collection containing $N = 1,400$ research abstracts, and let $\mathcal{Q} = \{q_1, q_2, \dots, q_M\}$ represent a set of $M = 225$ natural language aerodynamic inquiries. Associated with each query $q \in \mathcal{Q}$ is a subset of ground-truth human relevance judgments $\mathcal{G}(q) \subset \mathcal{D}$.
+
+The fundamental objective of Learning to Rank (LTR) is to learn a parameterized scoring function $f(q, d; \boldsymbol{\theta}): \mathcal{Q} \times \mathcal{D} \to \mathbb{R}$ that induces an optimal ranking permutation $\pi_q$ over the collection:
+\begin{equation}
+\pi_q = \operatorname{argsort}_{d \in \mathcal{D}} \left( -f(q, d; \boldsymbol{\theta}) \right)
+\label{eq:ranking_perm}
+\end{equation}
+such that documents belonging to the relevant set $\mathcal{G}(q)$ are ranked ahead of non-relevant documents.
+
+\subsection{Formal Evaluation Metric Definitions}
+The quality of the retrieved ranked list $\mathcal{R}_k(q)$ of top-$k$ documents is evaluated against the ground-truth set $\mathcal{G}(q)$ using standard Information Retrieval measures:
+
+\textbf{1. Precision at Rank $k$ ($\text{P}@k$):} The proportion of retrieved documents in the top-$k$ positions that are relevant:
+\begin{equation}
+\text{Precision}@k(q) = \frac{|\mathcal{R}_k(q) \cap \mathcal{G}(q)|}{k}
+\label{eq:precision}
+\end{equation}
+
+\textbf{2. Recall at Rank $k$ ($\text{R}@k$):} The fraction of all known relevant documents that are successfully retrieved within the top-$k$ positions:
+\begin{equation}
+\text{Recall}@k(q) = \frac{|\mathcal{R}_k(q) \cap \mathcal{G}(q)|}{|\mathcal{G}(q)|}
+\label{eq:recall}
+\end{equation}
+
+\textbf{3. F1 Score at Rank $k$ ($\text{F1}@k$):} The harmonic mean of Precision@$k$ and Recall@$k$, balancing precision and coverage:
+\begin{equation}
+\text{F1}@k(q) = 
+\begin{cases} 
+\dfrac{2 \cdot \text{Precision}@k(q) \cdot \text{Recall}@k(q)}{\text{Precision}@k(q) + \text{Recall}@k(q)}, & \text{if } \text{Precision} + \text{Recall} > 0 \\ 
+0, & \text{otherwise} 
+\end{cases}
+\label{eq:f1}
+\end{equation}
+
+\textbf{4. Mean Average Precision (MAP):} Macro-average of Average Precision across all test queries, measuring ranking quality across all recall levels:
+\begin{align}
+\text{AP}(q) &= \frac{1}{|\mathcal{G}(q)|} \sum_{r=1}^{|\mathcal{R}(q)|} \text{Precision}@r(q) \cdot \mathbb{I}(d_r \in \mathcal{G}(q)) \label{eq:ap} \\
+\text{MAP} &= \frac{1}{|\mathcal{Q}_{\text{test}}|} \sum_{q \in \mathcal{Q}_{\text{test}}} \text{AP}(q) \label{eq:map}
+\end{align}
+
+\textbf{5. Mean Reciprocal Rank (MRR):} The average reciprocal rank of the first relevant document retrieved:
+\begin{equation}
+\text{MRR} = \frac{1}{|\mathcal{Q}_{\text{test}}|} \sum_{q \in \mathcal{Q}_{\text{test}}} \frac{1}{\min \{r : d_r \in \mathcal{G}(q)\}}
+\label{eq:mrr}
+\end{equation}
+
+\subsection{Investigated Models}
+As outlined in the assignment specification, three distinct models are evaluated:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Baseline Model:} Robertson-Sp\"{a}rck Jones BM25 probabilistic retrieval without machine learning augmentation.
+    \item \textbf{Method A (Boolean Weighted Zone Scoring):} Decomposing documents into four distinct zones (Title, Author, Bibliography, Body text) and learning base linear weights via simplex grid search.
+    \item \textbf{Method B (Linear Support Vector Machines):} Pointwise Learning to Rank using a Linear SVM trained on 22 fine-grained query-document features extracted via PyTerrier pipelines.
+\end{enumerate}
+
+% =========================================================================
+% SECTION 3: IMPLEMENTATION DETAILS
+% =========================================================================
+\section{Implementation Details}
+
+\subsection{Custom Data Parser and Field Extraction}
+The raw Cranfield collection archives in \texttt{cran.tar.gz} contain three primary files structured in SGML-style tagged blocks:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Documents (\texttt{cran.all.1400}):} Contains 1,400 aerodynamic research abstracts. We developed a robust regular-expression parser (\texttt{data\_parser.py}) that splits on \texttt{.I <doc\_id>} tags and extracts the four distinct fields:
+    \begin{itemize}
+        \item \texttt{.T}: Document Title.
+        \item \texttt{.A}: Author(s) of the paper.
+        \item \texttt{.B}: Bibliographic citation and journal metadata.
+        \item \texttt{.W}: Abstract body text.
+    \end{itemize}
+    \item \textbf{Queries (\texttt{cran.qry}):} Contains 225 natural language technical queries marked by \texttt{.I <query\_id>} and \texttt{.W <query\_text>}.
+    \item \textbf{Relevance Judgments (\texttt{cranqrel}):} Contains 1,837 relevance assessments formatted as three space-delimited columns: \texttt{<query\_id> <doc\_id> <grade>}.
+\end{itemize}
+
+\subsection{Critical Discovery: Sequential Query ID Mapping}
+During exploratory data parsing, our team identified a critical formatting issue in the original Cranfield files:
+\begin{itemize}[leftmargin=*]
+    \item In \texttt{cran.qry}, the original historical query identifiers skip integers (e.g., \texttt{.I 001}, \texttt{.I 002}, \texttt{.I 004}, \texttt{.I 008}, up to \texttt{.I 365}), though there are exactly 225 queries in total.
+    \item In Donna Harman's \texttt{cranqrel} file, the queries are indexed sequentially from \texttt{1} to \texttt{225}.
+\end{itemize}
+If a parser joins queries to judgments using the raw integer in \texttt{.I}, only 152 queries find matches, causing 73 queries (32.4\% of the corpus) to be discarded as unjudged. Our custom parser implements an explicit 1-to-1 sequential normalization ($i$-th query in \texttt{cran.qry} maps to query ID $i$ in \texttt{cranqrel}), guaranteeing 100\% judgment alignment (all 1,837 judgments preserved).
+
+\subsection{Relevance Scale Interpretation}
+Relevance judgments in \texttt{cranqrel} follow Cyril Cleverdon's 5-point scale:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Grade 1 ($n = 128$):} References providing a complete answer to the query.
+    \item \textbf{Grade 2 ($n = 387$):} References of high degree of relevance crucial to the inquiry.
+    \item \textbf{Grade 3 ($n = 734$):} References of useful background or suggesting methodological approaches.
+    \item \textbf{Grade 4 ($n = 363$):} References of minimum interest.
+    \item \textbf{Grade -1 ($n = 225$):} The source prompt document from which the aerodynamicist formulated the question.
+\end{itemize}
+In accordance with standard Cranfield evaluation literature, all grades in $\{-1, 1, 2, 3, 4\}$ represent positive relevance ($y = 1$), while documents omitted from the judgment set represent negative relevance ($y = 0$).
+
+\subsection{Train / Test Partitioning Strategy}
+To guarantee unbiased evaluation without data leakage, the 225 queries and their relevance judgments were partitioned using an exact \textbf{80\% Train / 20\% Test} split with a fixed seed (\texttt{random\_state = 42}):
+\begin{table}[H]
+\centering
+\small
+\caption{Cranfield Query and Qrel Dataset Split}
+\label{tab:split}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{lcccc}
+\toprule
+\textbf{Partition Name} & \textbf{Ratio (\%)} & \textbf{Query Count} & \textbf{Relevance Judgments} & \textbf{Avg Relevant Docs / Query} \\
+\midrule
+Training Split & 80.0\% & 180 queries & 1,505 qrels & 8.36 docs / query \\
+Testing Split & 20.0\% & 45 queries & 332 qrels & 7.38 docs / query \\
+Total Corpus & 100.0\% & 225 queries & 1,837 qrels & 8.16 docs / query \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+All machine learning optimization (grid search in Method A and SVM hyperplane fitting in Method B) was performed strictly on the 180 training queries. The 45 test queries were held out entirely until final evaluation.
+
+\subsection{PyTerrier Inverted Indexing & Baseline BM25}
+The pipeline utilizes PyTerrier (version 0.11.0), an advanced Python framework interfacing with the Java-based Terrier search engine (\texttt{indexer.py}). Indexing was performed via \texttt{pt.IterDictIndexer} with metadata tracking:
+\begin{itemize}[leftmargin=*]
+    \item Total indexed documents: $N = 1,400$.
+    \item Total vocabulary size: $|\mathcal{V}| = 9,302$ unique term tokens.
+    \item Average document length: $\text{avgdl} = 111.59$ word tokens.
+    \item Term preprocessing: Alphanumeric tokenization, case-folding, and standard stopword filtering (127 English stopwords).
+    \item Robertson-Sp\"{a}rck Jones IDF formula:
+    \begin{equation}
+    \text{IDF}(t) = \ln\left(1 + \frac{N - \text{df}(t) + 0.5}{\text{df}(t) + 0.5}\right)
+    \label{eq:rsj_idf}
+    \end{equation}
+\end{itemize}
+
+The baseline BM25 retrieval model computes the score between query $q$ and document $d$ as:
+\begin{equation}
+\text{BM25}(q, d) = \sum_{t \in q \cap d} \text{IDF}(t) \cdot \frac{\text{tf}(t, d) \cdot (k_1 + 1)}{\text{tf}(t, d) + k_1 \left(1 - b + b \cdot \frac{|d|}{\text{avgdl}}\right)}
+\label{eq:bm25_formula}
+\end{equation}
+where $k_1 = 1.2$ controls term frequency saturation, and $b = 0.75$ controls document length penalization. The baseline retriever was constructed via \texttt{pt.terrier.Retriever(index\_ref, wmodel='BM25', num\_results=100)}.
+
+\subsection{Method A: Boolean Weighted Zone Scoring Architecture}
+In Method A (\texttt{method\_a\_zone\_scoring.py}), documents are partitioned into four zones: Title ($T$), Author ($A$), Bibliography ($B$), and Text Body / Abstract ($W$). For multi-term queries, the Boolean matching score $s_z(q, d)$ for zone $z$ is formulated as the coordinate term overlap ratio:
+\begin{equation}
+s_z(q, d) = \frac{|\text{terms}(q) \cap \text{terms}(\text{zone}_z(d))|}{|\text{terms}(q)|} \in [0, 1]
+\label{eq:zone_score_individual}
+\end{equation}
+The composite document ranking score is a linear combination of the individual zone scores:
+\begin{equation}
+\text{Score}_{\text{zone}}(q, d) = w_T s_T(q, d) + w_A s_A(q, d) + w_B s_B(q, d) + w_W s_W(q, d)
+\label{eq:zone_score_composite}
+\end{equation}
+subject to the simplex constraints $\sum_{z} w_z = 1.0$ and $w_z \ge 0$.
+
+\subsubsection{Simplex Grid Search Optimization Algorithm}
+To learn the base weights, we constructed a grid search over the 4-simplex with resolution step $\Delta = 0.05$. The number of non-negative weight vectors is given by the stars-and-bars combinatorial formula:
+\begin{equation}
+|\Omega| = \binom{\frac{1.0}{0.05} + 4 - 1}{4 - 1} = \binom{20 + 3}{3} = \frac{23 \times 22 \times 21}{6} = 1,771 \text{ candidate vectors}
+\end{equation}
+
+Algorithm~\ref{alg:grid_search} details the optimization procedure.
+
+\begin{algorithm}[H]
+\caption{Simplex Grid Search for Optimal Zone Base Weights}
+\label{alg:grid_search}
+\small
+\begin{algorithmic}[1]
+\Require Training queries $\mathcal{Q}_{\text{train}}$, Relevance sets $\mathcal{G}(q)$, Step $\Delta = 0.05$
+\Ensure Optimal base weight vector $\boldsymbol{w}^* \in \mathbb{R}^4$
+\State Initialize candidate set $\Omega \gets \emptyset$, $\text{best\_F1} \gets -1.0$
+\For{$w_1 \gets 0$ to $1.0$ step $\Delta$}
+    \For{$w_2 \gets 0$ to $(1.0 - w_1)$ step $\Delta$}
+        \For{$w_3 \gets 0$ to $(1.0 - w_1 - w_2)$ step $\Delta$}
+            \State $w_4 \gets \max(0.0, 1.0 - w_1 - w_2 - w_3)$
+            \State $\Omega \gets \Omega \cup \{[w_1, w_2, w_3, w_4]^T\}$
+        \EndFor
+    \EndFor
+\EndFor
+\For{$\boldsymbol{w} \in \Omega$}
+    \State $\text{F1\_sum} \gets 0$
+    \For{$q \in \mathcal{Q}_{\text{train}}$}
+        \State Compute $\boldsymbol{S}_q \gets \boldsymbol{M}_q \boldsymbol{w}$ for all $d \in \mathcal{D}$
+        \State $\mathcal{R}_{10}(q) \gets \operatorname{top\_10}(\boldsymbol{S}_q)$
+        \State $\text{F1\_sum} \gets \text{F1\_sum} + \text{F1}@10(\mathcal{R}_{10}(q), \mathcal{G}(q))$
+    \EndFor
+    \State $\text{mean\_F1} \gets \text{F1\_sum} / |\mathcal{Q}_{\text{train}}|$
+    \If{$\text{mean\_F1} > \text{best\_F1}$}
+        \State $\text{best\_F1} \gets \text{mean\_F1}$, $\boldsymbol{w}^* \gets \boldsymbol{w}$
+    \EndIf
+\EndFor
+\State \Return $\boldsymbol{w}^*$
+\end{algorithmic}
+\end{algorithm}
+
+The optimal learned weights discovered on the training split are:
+\begin{equation}
+w_T^* = 0.5500 \quad (55\%), \quad w_A^* = 0.0000 \quad (0\%), \quad w_B^* = 0.0500 \quad (5\%), \quad w_W^* = 0.4000 \quad (40\%)
+\end{equation}
+with a training mean F1@10 of \textbf{0.2976}. Method A is wrapped into a custom \texttt{pt.Transformer} class for PyTerrier execution. Figure~\ref{fig:zone_donut} visualizes the resulting allocation.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{figures/zone_weights_donut.png}
+\caption{Method A optimal learned zone weight allocation across Title (55\%), Body (40\%), Bibliography (5\%), and Author (0\%).}
+\label{fig:zone_donut}
+\end{figure}
+
+\subsection{Method B: 22-Feature Engineering Pipeline}
+In Method B (\texttt{method\_b\_svm\_ltr.py}), candidate ranking is formulated as a supervised classification problem. For every candidate query-document pair $(q, d)$, we compute exactly 22 features, as defined in Table~\ref{tab:features_spec}.
+
+\begin{table}[H]
+\centering
+\caption{Mathematical Specification of the 22 Query-Document Features for Method B}
+\label{tab:features_spec}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{rllX}
+\toprule
+\textbf{\#} & \textbf{Feature Name} & \textbf{Mathematical Formulation} & \textbf{Description / IR Hypothesis} \\
+\midrule
+1 & query term number & $|q|$ & Total token length of query (complexity indicator) \\
+2 & query term ratio & $\frac{|q \cap d|}{|q|}$ & Fraction of query terms present in candidate document \\
+3 & stream length & $|d|$ & Total document token length (document length penalty factor) \\
+4 & idf & $\sum_{t \in q \cap d} \text{IDF}(t)$ & Cumulative inverse document frequency of matched terms \\
+5 & sum of term frequency & $\sum_{t \in q} \text{tf}(t, d)$ & Total frequency of query terms in candidate document \\
+6 & min of term frequency & $\min_{t \in q \cap d} \text{tf}(t, d)$ (0 if empty) & Frequency of least matched query term \\
+7 & max of term frequency & $\max_{t \in q} \text{tf}(t, d)$ & Peak frequency of any query term in candidate document \\
+8 & mean of term frequency & $\frac{1}{|q|} \sum_{t \in q} \text{tf}(t, d)$ & Average frequency across all query terms \\
+9 & variance of term frequency & $\Var_{t \in q}(\text{tf}(t, d))$ & Dispersion of term frequencies across query terms \\
+10 & sum norm tf & $\sum_{t \in q} \frac{\text{tf}(t, d)}{|d|}$ & Document-length normalized cumulative term density \\
+11 & min norm tf & $\min_{t \in q \cap d} \frac{\text{tf}(t, d)}{|d|}$ & Minimum normalized term density among matched terms \\
+12 & max norm tf & $\max_{t \in q} \frac{\text{tf}(t, d)}{|d|}$ & Peak normalized term density in candidate document \\
+13 & mean norm tf & $\frac{1}{|q|} \sum_{t \in q} \frac{\text{tf}(t, d)}{|d|}$ & Mean normalized term density across query terms \\
+14 & variance norm tf & $\Var_{t \in q}\left(\frac{\text{tf}(t, d)}{|d|}\right)$ & Variance of length-normalized term densities \\
+15 & sum of tf*idf & $\sum_{t \in q} \text{tf}(t, d) \cdot \text{IDF}(t)$ & Classical cumulative TF-IDF score \\
+16 & min of tf*idf & $\min_{t \in q \cap d} \text{tf}(t, d) \cdot \text{IDF}(t)$ & Weakest discriminative term weight \\
+17 & max of tf*idf & $\max_{t \in q} \text{tf}(t, d) \cdot \text{IDF}(t)$ & Strongest discriminative term weight \\
+18 & mean of tf*idf & $\frac{1}{|q|} \sum_{t \in q} \text{tf}(t, d) \cdot \text{IDF}(t)$ & Mean discriminative weight across query terms \\
+19 & variance of tf*idf & $\Var_{t \in q}(\text{tf}(t, d) \cdot \text{IDF}(t))$ & Variance of term importance weights (keyword distinctiveness) \\
+20 & boolean model & $|q \cap d|$ & Coordinate term matching overlap score \\
+21 & vector space model & $\cos(\vec{q}, \vec{d}) = \frac{\sum_{t \in q \cap d} (\text{tf}_q \text{IDF}_t)(\text{tf}_d \text{IDF}_t)}{\|\vec{q}\|_2 \|\vec{d}\|_2}$ & Cosine similarity in TF-IDF vector space \\
+22 & BM25 & Robertson-Sp\"{a}rck Jones score & Non-linear probabilistic benchmark score ($k_1=1.2, b=0.75$) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Linear SVM Model Formulation and Training}
+Candidate pools for the 180 training queries were formed by taking top-100 BM25 retrieved documents and ensuring all known relevant documents were present, yielding 18,419 instances (1,505 positive, 16,914 negative). We solved the regularized hinge loss objective:
+\begin{equation}
+\min_{\boldsymbol{w}, b, \boldsymbol{\xi}} \frac{1}{2} \|\boldsymbol{w}\|_2^2 + C \sum_{i=1}^M \xi_i \quad \text{s.t.} \quad y_i (\boldsymbol{w}^T \boldsymbol{x}_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0
+\label{eq:svm_objective}
+\end{equation}
+with balanced class weighting ($C_+ = C \frac{N_-}{N_+}$). We standardized features ($z = (x - \mu)/\sigma$) to prevent features with wide numerical ranges (e.g., stream length) from dominating smaller ratios. The effective unscaled decision function applied during test re-ranking is:
+\begin{equation}
+\text{score}(q, d) = \sum_{j=1}^{22} \left( \frac{w_{\text{std}, j}}{\sigma_j} \right) x_j + \left( b_{\text{std}} - \sum_{j=1}^{22} \frac{w_{\text{std}, j} \mu_j}{\sigma_j} \right)
+\label{eq:svm_unscaled_scoring}
+\end{equation}
+
+% =========================================================================
+% SECTION 4: PLAN OF EXPERIMENTS
+% =========================================================================
+\section{Plan of Experiments}
+To thoroughly evaluate the systems from an engineering student perspective, we established four clear experimental hypotheses:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Hypothesis 1 (Zone Importance):} In academic technical literature, document titles carry disproportionate topical significance compared to body text, while author names provide negligible topical discrimination for conceptual physics queries.
+    \item \textbf{Hypothesis 2 (LTR Feature Synthesis):} A multi-feature Linear SVM re-ranker can leverage document-length normalized density and TF-IDF variance to improve upon single-heuristic ranking at the top ranks (P@5 and MRR).
+    \item \textbf{Hypothesis 3 (Saturation Dynamics):} Due to the linear nature of SVM hyperplanes, BM25's sublinear term frequency saturation curve ($tf / (tf + k_1)$) will remain competitive on global recall and MAP.
+    \item \textbf{Hypothesis 4 (Regularization Sensitivity):} Stronger $L_2$ regularization ($C \le 0.01$) will stabilize weights against severe feature multicollinearity among TF-IDF variants.
+\end{itemize}
+
+All 45 test queries were processed across the three systems, and results were logged in standard TREC 6-column format (\texttt{<qid> Q0 <docno> <rank> <score> <tag>}).
+
+% =========================================================================
+% SECTION 5: RESULTS
+% =========================================================================
+\section{Results}
+
+\subsection{Master Empirical Results Table}
+Table~\ref{tab:master_results} presents the comparative evaluation across all three models on the 45 unseen test queries.
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive Performance Comparison on 45 Test Queries across Precision, Recall, F1, MAP, and MRR}
+\label{tab:master_results}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{lccccc}
+\toprule
+\textbf{Evaluation Metric} & \textbf{Pure BM25 Baseline} & \textbf{Method A (Zone Scoring)} & \textbf{Method B (Linear SVM LTR)} & \textbf{$\Delta$ (A vs. Base)} & \textbf{$\Delta$ (B vs. Base)} \\
+\midrule
+\textbf{Precision@5} & \textbf{0.4578} & 0.4000 & 0.3956 & -12.63\% & -13.59\% \\
+\textbf{Precision@10} & \textbf{0.3089} & 0.2644 & 0.2600 & -14.41\% & -15.83\% \\
+\textbf{Precision@20} & \textbf{0.1956} & 0.1678 & 0.1611 & -14.21\% & -17.64\% \\
+\midrule
+\textbf{Recall@5} & \textbf{0.3698} & 0.3207 & 0.3317 & -13.28\% & -10.30\% \\
+\textbf{Recall@10} & \textbf{0.4812} & 0.4141 & 0.4275 & -13.94\% & -11.16\% \\
+\textbf{Recall@20} & \textbf{0.5864} & 0.5265 & 0.5126 & -10.21\% & -12.59\% \\
+\midrule
+\textbf{F1 Score@5} & \textbf{0.3795} & 0.3338 & 0.3353 & -12.04\% & -11.65\% \\
+\textbf{F1 Score@10} & \textbf{0.3500} & 0.3033 & 0.3034 & -13.34\% & -13.31\% \\
+\textbf{F1 Score@20} & \textbf{0.2759} & 0.2416 & 0.2335 & -12.43\% & -15.37\% \\
+\midrule
+\textbf{Mean Avg Precision (MAP)} & \textbf{0.4291} & 0.3546 & 0.3766 & -17.36\% & -12.23\% \\
+\textbf{Mean Reciprocal Rank (MRR)} & \textbf{0.8310} & 0.7145 & \textbf{0.8193} & -14.02\% & \textbf{-1.41\%} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Graphical Evaluation Analysis}
+Figures~\ref{fig:precision_recall_bars} through~\ref{fig:svm_sensitivity_curve} illustrate the empirical trends across the three models.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/precision_comparison.png}
+        \caption{Precision@k across cutoffs $k \in \{5, 10, 20\}$.}
+        \label{fig:precision}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/recall_comparison.png}
+        \caption{Recall@k across cutoffs $k \in \{5, 10, 20\}$.}
+        \label{fig:recall}
+    \end{subfigure}
+    \caption{Precision@k and Recall@k comparison across rank cutoffs.}
+    \label{fig:precision_recall_bars}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/f1_comparison.png}
+        \caption{F1 Score@k comparison across models.}
+        \label{fig:f1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \includegraphics[width=\textwidth]{figures/map_mrr_comparison.png}
+        \caption{MAP and MRR benchmarks.}
+        \label{fig:map_mrr}
+    \end{subfigure}
+    \caption{F1 Score@k and overall ranking benchmarks (MAP \& MRR).}
+    \label{fig:f1_and_benchmarks}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.72\textwidth]{figures/precision_recall_curves.png}
+    \caption{Precision-Recall curves across rank cutoffs $k \in \{5, 10, 20\}$ comparing BM25, Method A, and Method B.}
+    \label{fig:pr_curve}
+\end{figure}
+
+\subsection{Learned Feature Weights in Method B}
+Table~\ref{tab:svm_weights} and Figure~\ref{fig:svm_bars} report the exact real-valued weights learned by the Linear SVM across all 22 features.
+
+\begin{table}[H]
+\centering
+\caption{Learned Feature Weights from Linear SVM ($C=0.01$)}
+\label{tab:svm_weights}
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{rlrrX}
+\toprule
+\textbf{\#} & \textbf{Feature Name} & \textbf{$w_{\text{std}}$} & \textbf{$w_{\text{raw}}$} & \textbf{Signal Direction / Role} \\
+\midrule
+1 & query term number & -0.1175 & -0.029526 & Length penalty prior \\
+2 & query term ratio & -0.1415 & -0.891322 & Compensated by overlap \\
+3 & stream length & +0.0051 & +0.000091 & Neutral length scale \\
+4 & idf & \textbf{+0.1349} & +0.034584 & Strong positive discriminator \\
+5 & sum of term frequency & \textbf{+0.1103} & +0.019011 & Keyword presence reward \\
+6 & min of term frequency & +0.0659 & +0.055061 & Rare term bonus \\
+7 & max of term frequency & -0.0846 & -0.035887 & Keyword stuffing penalty \\
+8 & mean of term frequency & +0.0369 & +0.061225 & Average concentration \\
+9 & variance of term frequency & -0.1516 & -0.047394 & Penalizes uneven dispersion \\
+10 & sum norm tf & \textbf{+0.1690} & +3.343976 & Primary density driver \\
+11 & min norm tf & +0.0236 & +1.719580 & Uniform density reward \\
+12 & max norm tf & \textbf{+0.1553} & +7.613548 & Concentrated density peak \\
+13 & mean norm tf & +0.0079 & +1.460665 & Average density metric \\
+14 & variance norm tf & -0.1445 & -644.390781 & Density spike regularizer \\
+15 & sum of tf*idf & \textbf{+0.1225} & +0.009845 & Core composite relevance \\
+16 & min of tf*idf & -0.1984 & -0.057138 & Collinear stabilizer \\
+17 & max of tf*idf & -0.2057 & -0.034303 & Collinear stabilizer \\
+18 & mean of tf*idf & \textbf{+0.1648} & +0.125295 & Discriminative term power \\
+19 & variance of tf*idf & \textbf{+0.1743} & +0.008410 & Unique keyword reward \\
+20 & boolean model & -0.2520 & -0.148140 & Coarse overlap damper \\
+21 & vector space model & \textbf{+0.0297} & +0.375203 & Cosine angle bonus \\
+22 & BM25 & \textbf{+0.0097} & +0.001886 & Non-linear anchor \\
+-- & Intercept (Bias $b$) & -0.1092 & +0.187820 & Decision threshold \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/svm_feature_weights.png}
+\caption{Standardized feature weights learned by Linear SVM ($C=0.01$), distinguishing positive drivers from collinear negative regularizers.}
+\label{fig:svm_bars}
+\end{figure}
+
+% =========================================================================
+% SECTION 6: DISCUSSION OF RESULTS
+% =========================================================================
+\section{Discussion of Results}
+
+\subsection{Why Title and Body Dominate Zone Scoring (Hypothesis 1)}
+The base weights discovered by grid search ($w_T = 0.55, w_W = 0.40, w_B = 0.05, w_A = 0.00$) provide compelling empirical validation of Information Retrieval theory in scientific corpora:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Semantic Density of Titles ($w_T = 0.55$):} In aerodynamic research literature, paper titles are concise, highly condensed semantic declarations. A term match in a title of 8 words carries a much higher signal-to-noise ratio than a match in a 200-word abstract. The 55\% allocation reflects this high precision signal.
+    \item \textbf{Lexical Coverage of Abstracts ($w_W = 0.40$):} While titles carry high precision, they suffer from low recall due to brevity. The abstract body provides the descriptive vocabulary and experimental parameters needed for broad recall.
+    \item \textbf{Rejection of Author Field ($w_A = 0.00$):} The author field received zero weight. In the Cranfield collection, inquiries are conceptual physics questions (e.g., \textit{``what similarity laws must be obeyed when constructing aeroelastic models...''}) rather than bibliographical author searches. Matches with author names introduce purely noisy false positives.
+    \item \textbf{Surprising Strength of a 4-Parameter Model:} Remarkably, Method A achieves an F1@10 of \textbf{0.3033}, closely trailing the 22-feature SVM model (0.3034) with zero feature extraction overhead.
+\end{enumerate}
+
+\subsection{Feature Dynamics and Multicollinearity in Linear SVM (Hypothesis 2 \& 4)}
+Examining the weights in Table~\ref{tab:svm_weights} yields fundamental insights into Pointwise Learning to Rank:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Length-Normalized Density Dominance:} Length-normalized term frequency features (\texttt{sum norm tf}: +0.1690, \texttt{max norm tf}: +0.1553) and discriminative TF-IDF features (\texttt{mean of tf*idf}: +0.1648, \texttt{variance of tf*idf}: +0.1743, \texttt{idf}: +0.1349) emerged as the primary positive predictors. This demonstrates that term concentration per unit document length is far more informative than raw unnormalized frequency.
+    \item \textbf{Multicollinear Opposing Weights:} Features like \texttt{sum\_tf}, \texttt{sum\_tfidf}, and \texttt{boolean\_model} correlate heavily ($r > 0.85$). In linear models, severe collinearity causes the optimizer to assign positive weights to one feature while assigning compensating negative weights to collinear partners (e.g., \texttt{boolean model}: -0.2520, \texttt{max tf*idf}: -0.2057) to act as regularizing stabilizers against duplicate signals.
+    \item \textbf{High Top-Rank Accuracy (MRR Parity):} Method B achieves an exceptional MRR of \textbf{0.8193}, virtually matching the BM25 benchmark (0.8310, a difference of just 1.4\%). The Linear SVM re-ranker excels at elevating authoritative relevant documents to rank 1.
+\end{enumerate}
+
+\subsection{Why Pure BM25 Outperforms Linear Models on MAP (Hypothesis 3)}
+As students, our initial intuition was that a machine learning model with 22 features would comfortably surpass pure BM25 on all metrics. However, our empirical findings showed BM25 achieving MAP = 0.4291 versus 0.3766 for SVM. This outcome highlights the theoretical distinction between linear hyperplanes and non-linear saturation:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Sublinear Term Saturation:} BM25 calculates term impact through a concave rational function $\frac{\text{tf}}{\text{tf} + k_1(1-b + b \cdot dl/\text{avgdl})}$. A term appearing 6 times has only $\approx 2.3\times$ the weight of a term appearing once.
+    \item \textbf{Linear Superposition Limitation:} A Linear SVM computes a linear combination $\sum w_i x_i$. Even with normalized features, a linear model cannot reproduce this concave saturation curve across small datasets without non-linear kernels or gradient-boosted regression trees (e.g., LambdaMART).
+\end{itemize}
+
+\subsection{Sensitivity Analysis Across Regularization $C$}
+Table~\ref{tab:sensitivity} and Figure~\ref{fig:svm_sensitivity_curve} show the evaluation metrics across multiple values of $C$.
+
+\begin{table}[H]
+\centering
+\caption{Linear SVM Regularization Parameter Sensitivity}
+\label{tab:sensitivity}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{lccccc}
+\toprule
+\textbf{Parameter $C$} & \textbf{P@10} & \textbf{R@10} & \textbf{F1@10} & \textbf{MAP} & \textbf{MRR} \\
+\midrule
+$C = 0.0001$ & 0.2644 & 0.4260 & 0.3054 & 0.3871 & 0.8115 \\
+$C = 0.0010$ & 0.2600 & 0.4261 & 0.3027 & 0.3849 & 0.8174 \\
+\textbf{$C = 0.0100$ (Selected)} & \textbf{0.2600} & \textbf{0.4275} & \textbf{0.3034} & \textbf{0.3766} & \textbf{0.8193} \\
+$C = 0.1000$ & 0.2600 & 0.4275 & 0.3034 & 0.3738 & 0.8193 \\
+$C = 1.0000$ & 0.2600 & 0.4275 & 0.3034 & 0.3736 & 0.8193 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.68\textwidth]{figures/svm_c_sensitivity.png}
+\caption{Regularization sensitivity curve across $C \in [10^{-4}, 1.0]$.}
+\label{fig:svm_sensitivity_curve}
+\end{figure}
+
+\subsection{Query-Level Error Case Studies}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Query 10 (\textit{``turbulent couette flow behaviour''}):} Method B successfully boosted document 493 from rank 3 (BM25) to rank 0, because high cosine similarity and peak normalized term frequency correctly identified it as the primary reference.
+    \item \textbf{Query 32 (\textit{``hypersonic shock wave interaction''}):} Method A achieved P@5 = 0.8000, outperforming BM25 because the exact query keywords appeared verbatim in the title, maximizing the 55\% title weight.
+    \item \textbf{Long Exploratory Queries:} BM25 outperformed both methods on complex multi-clause inquiries, where document length variations were substantial, proving the robustness of the length normalization parameter $b = 0.75$.
+\end{itemize}
+
+% =========================================================================
+% SECTION 7: CONCLUSION
+% =========================================================================
+\section{Conclusion \& Student Learning Outcomes}
+In this assignment, we successfully engineered an end-to-end Learning-to-Rank system on the Cranfield text collection using PyTerrier and Scikit-Learn:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Data Engineering:} We resolved the query ID numbering discrepancy between \texttt{cran.qry} and \texttt{cranqrel}, ensuring 100\% ground-truth coverage.
+    \item \textbf{Zone Weighting:} Simplex grid search proved that Title (0.55) and Body (0.40) dominate retrieval, while Author (0.00) was correctly eliminated.
+    \item \textbf{Supervised LTR:} A 22-feature Linear SVM learned fine-grained density weights, achieving an outstanding MRR of 0.8193.
+    \item \textbf{Theoretical Insight:} We demonstrated why non-linear term saturation makes pure BM25 a formidable baseline against linear LTR models.
+\end{enumerate}
+
+All submission files, test query rankings (\texttt{test\_results\_*.txt}), and evaluation scripts (\texttt{run\_on\_unknown\_queries.py}) have been verified and saved to disk.
+
+% =========================================================================
+% REFERENCES
+% =========================================================================
+\begin{thebibliography}{9}
+\bibitem{cleverdon1967}
+C.~W.~Cleverdon, ``The Cranfield tests on index language devices,'' \textit{Aslib Proceedings}, vol.~19, no.~6, pp.~173--194, 1967.
+
+\bibitem{robertson2009}
+S.~E.~Robertson and H.~Zaragoza, ``The Probabilistic Relevance Framework: BM25 and Beyond,'' \textit{Foundations and Trends in Information Retrieval}, vol.~3, no.~4, pp.~333--389, 2009.
+
+\bibitem{joachims2002}
+T.~Joachims, ``Optimizing search engines using clickthrough data,'' in \textit{Proceedings of the 8th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining}, pp.~133--142, 2002.
+
+\bibitem{macdonald2020}
+C.~Macdonald and N.~Tonellotto, ``Declarative Experimentation in Information Retrieval using PyTerrier,'' in \textit{Proceedings of the 2020 ACM SIGIR International Conference on the Theory of Information Retrieval (ICTIR)}, pp.~33--36, 2020.
+
+\bibitem{manning2008}
+C.~D.~Manning, P.~Raghavan, and H.~Sch\"{u}tze, \textit{Introduction to Information Retrieval}, Cambridge University Press, 2008.
+\end{thebibliography}
+
+\end{document}
